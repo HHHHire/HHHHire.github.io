@@ -1,0 +1,150 @@
+<h1>Dubbo</h1>
+<blockquote><p>参照Dubbo官方文档</p>
+</blockquote>
+<h3>基础</h3>
+<p><img src="file://F:/note/images/dubbo1.jpg" referrerpolicy="no-referrer" alt="注册流程"></p>
+<h3>协议</h3>
+<h4>dubbo://</h4>
+<p>Dubbo 缺省协议采用单一长连接和 NIO 异步通讯，适合于小数据量大并发的服务调用，以及服务消费者机器数远大于服务提供者机器数的情况。 </p>
+<p>反之，Dubbo 缺省协议不适合传送大数据量的服务，比如传文件，传视频等，除非请求量很低。</p>
+<p><strong>特性</strong></p>
+<ul>
+<li>连接个数：单连接</li>
+<li>连接方式：长连接</li>
+<li>传输协议：TCP</li>
+<li>传输方式：NIO 异步传输</li>
+<li>序列化：Hessian 二进制序列化</li>
+<li>适用范围：传入传出参数数据包较小（建议小于100K），消费者比提供者个数多，单一消费者无法压满提供者，尽量不要用 dubbo 协议传输大文件或超大字符串。</li>
+<li>适用场景：常规远程服务方法调用</li>
+
+</ul>
+<p><strong>约束</strong></p>
+<ul>
+<li>参数及返回值需实现 <code>Serializable</code> 接口</li>
+<li>参数及返回值不能自定义实现 <code>List</code>, <code>Map</code>, <code>Number</code>, <code>Date</code>, <code>Calendar</code> 等接口，只能用 JDK 自带的实现，因为 hessian 会做特殊处理，自定义实现类中的属性值都会丢失。</li>
+
+</ul>
+<p>数据通信：A-&gt;B</p>
+<ol>
+<li>类A比类B多一种属性：不抛异常，多的那个属性B接收不到。</li>
+<li>枚举A多一种枚举，使用多出来的枚举传输：抛异常；不使用：不抛异常，B正常接收</li>
+<li>A和B的属性名相同，但是类型不同：抛异常</li>
+
+</ol>
+<p>dubbo可以配置多端口、多连接(缺省每服务每提供者每消费者使用单一长连接)</p>
+<h4>rmi://</h4>
+<h4>grpc://</h4>
+<h3>配置</h3>
+<p>dubbo的配置方式主要有以下几种：XML配置、属性配置、API配置、注解配置。</p>
+<h4>XML配置</h4>
+<p>provider.xml示例</p>
+<pre><code class='language-xml' lang='xml'>&lt;beans xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+       xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;
+    &lt;dubbo:application name=&quot;demo-provider&quot;/&gt;
+    &lt;dubbo:registry address=&quot;zookeeper://127.0.0.1:2181&quot;/&gt;
+    &lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20890&quot;/&gt;
+    &lt;bean id=&quot;demoService&quot; class=&quot;org.apache.dubbo.samples.basic.impl.DemoServiceImpl&quot;/&gt;
+    &lt;dubbo:service interface=&quot;org.apache.dubbo.samples.basic.api.DemoService&quot; ref=&quot;demoService&quot;/&gt;
+&lt;/beans&gt;
+</code></pre>
+<p>consumer.xml示例</p>
+<pre><code class='language-xml' lang='xml'>&lt;beans xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:dubbo=&quot;http://dubbo.apache.org/schema/dubbo&quot;
+       xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd&quot;&gt;
+    &lt;dubbo:application name=&quot;demo-consumer&quot;/&gt;
+    &lt;dubbo:registry group=&quot;aaa&quot; address=&quot;zookeeper://127.0.0.1:2181&quot;/&gt;
+    &lt;dubbo:reference id=&quot;demoService&quot; check=&quot;false&quot; interface=&quot;org.apache.dubbo.samples.basic.api.DemoService&quot;/&gt;
+&lt;/beans&gt;
+</code></pre>
+<p>&nbsp;</p>
+<p><strong>配置之间的关系</strong></p>
+<p><img src="file://F:/note/images/dubbo-config.jpg" referrerpolicy="no-referrer" alt="配置关系"></p>
+<figure><table>
+<thead>
+<tr><th>标签</th><th>用途</th><th>解释</th></tr></thead>
+<tbody><tr><td><code>&lt;dubbo:service/&gt;</code></td><td>服务配置</td><td>用于暴露一个服务，定义服务的元信息，一个服务可以用多个协议暴露，一个服务也可以注册到多个注册中心</td></tr><tr><td><code>&lt;dubbo:reference/&gt;</code></td><td>引用配置</td><td>用于创建一个远程服务代理，一个引用可以指向多个注册中心</td></tr><tr><td><code>&lt;dubbo:protocol/&gt;</code></td><td>协议配置</td><td>用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受。如果需要支持多协议，可以声明多个标签并在中通过protocol属性指定使用的协议</td></tr><tr><td><code>&lt;dubbo:application/&gt;</code></td><td>应用配置</td><td>用于配置当前应用信息，不管该应用是提供者还是消费者</td></tr><tr><td><code>&lt;dubbo:module/&gt;</code></td><td>模块配置</td><td>用于配置当前模块信息，可选</td></tr><tr><td><code>&lt;dubbo:registry/&gt;</code></td><td>注册中心配置</td><td>用于配置连接注册中心相关信息</td></tr><tr><td><code>&lt;dubbo:monitor/&gt;</code></td><td>监控中心配置</td><td>用于配置连接监控中心相关信息，可选</td></tr><tr><td><code>&lt;dubbo:provider/&gt;</code></td><td>提供方配置</td><td>当 ProtocolConfig 和 ServiceConfig 某属性没有配置时，采用此缺省值，可选</td></tr><tr><td><code>&lt;dubbo:consumer/&gt;</code></td><td>消费方配置</td><td>当 ReferenceConfig 某属性没有配置时，采用此缺省值，可选</td></tr><tr><td><code>&lt;dubbo:method/&gt;</code></td><td>方法配置</td><td>用于 ServiceConfig 和 ReferenceConfig 指定方法级的配置信息</td></tr><tr><td><code>&lt;dubbo:argument/&gt;</code></td><td>参数配置</td><td>用于指定方法参数配置</td></tr></tbody>
+</table></figure>
+<p><strong>配置文件的优先级</strong></p>
+<p>如果在多处同时配置了一种属性，例如timeout，则判定如下：</p>
+<ul>
+<li>方法级别&gt;接口级别&gt;全局配置</li>
+<li>在级别相同的前提下，则消费方的配置&gt;提供方</li>
+
+</ul>
+<p><img src="file://F:/note/images/dubbo-config-override.jpg" referrerpolicy="no-referrer" alt="配置文件的优先级"></p>
+<h4>注解配置</h4>
+<p>采用注解配置相对更简便些，服务提供方暴露服务只需在类上添加注解<code>@Service</code>，但要注意是dubbo包下的。同时在properties配置文件中配置应用名称、注册中心地址、协议名称、协议端口等等。最后指定Spring扫描路径。</p>
+<p>服务消费方则需要使用<code>@Reference</code> 来注入服务提供方的实例。在properties中配置好应用名称、注册中心地址、超时时间等等，指定Spring扫描路径，即可远程调用服务。</p>
+<p>注解配置方式虽然简便但是功能不如XML配置来的全面，例如无法进行方法级别的一些配置。所以平时可以使用XML配置与注解配置相结合的方式。最后在启动类上引入XML的配置文件即可。</p>
+<pre><code class='language-java' lang='java'>@ImportResource({&quot;classpath:config/spring-dubbo-consumer.xml&quot;})
+</code></pre>
+<h4>属性配置</h4>
+<p>如果在xml配置中有超过一个的tag，那么你可以使用‘id’进行区分。如果你不指定id，它将作用于所有tag。</p>
+<ul>
+<li><code>dubbo.protocol.rmi.port=1099</code> 相当于 <code>&lt;dubbo:protocol id=&quot;rmi&quot; name=&quot;rmi&quot; port=&quot;1099&quot; /&gt;</code></li>
+<li><code>dubbo.registry.china.address=10.20.153.10:9090</code> 相当于 <code>&lt;dubbo:registry id=&quot;china&quot; address=&quot;10.20.153.10:9090&quot; /&gt;</code></li>
+
+</ul>
+<p>1：如果在classpath下有超过一个dubbo.properties文件，比如，两个jar包都各自包含了dubbo.properties，dubbo将随机选择一个加载，并且打印错误日志。</p>
+<p>2：如果 <code>id</code>没有在<code>protocol</code>中配置，将使用<code>name</code>作为默认属性。</p>
+<p>配置文件的覆盖：</p>
+<ul>
+<li>JVM System Properties，-D参数</li>
+<li>Externalized Configuration，外部化配置</li>
+<li>ServiceConfig、ReferenceConfig等编程接口采集的配置(API、XML?)</li>
+<li>本地配置文件dubbo.properties</li>
+
+</ul>
+<p><a href='file://F:\note\操作细节.md'>操作细节</a></p>
+<h3>注册中心</h3>
+<h4>zookeeper</h4>
+<p><img src="file://F:/note/images/dubbo-zookeeper.jpg" referrerpolicy="no-referrer"></p>
+<p>流程说明：</p>
+<ul>
+<li>服务提供者启动时: 向 <code>/dubbo/com.foo.BarService/providers</code> 目录下写入自己的 URL 地址</li>
+<li>服务消费者启动时: 订阅 <code>/dubbo/com.foo.BarService/providers</code> 目录下的提供者 URL 地址。并向 <code>/dubbo/com.foo.BarService/consumers</code> 目录下写入自己的 URL 地址</li>
+<li>监控中心启动时: 订阅 <code>/dubbo/com.foo.BarService</code> 目录下的所有提供者和消费者 URL 地址。</li>
+
+</ul>
+<p>注意：</p>
+<ul>
+<li>服务提供者启动时: 向 <code>/dubbo/com.foo.BarService/providers</code> 目录下写入自己的 URL 地址</li>
+<li>服务消费者启动时: 订阅 <code>/dubbo/com.foo.BarService/providers</code> 目录下的提供者 URL 地址。并向 <code>/dubbo/com.foo.BarService/consumers</code> 目录下写入自己的 URL 地址</li>
+<li>监控中心启动时: 订阅 <code>/dubbo/com.foo.BarService</code> 目录下的所有提供者和消费者 URL 地址。</li>
+
+</ul>
+<h3>元数据中心(zookeeper)</h3>
+<p>dubbo的provider和consumer有很多的配置项都只是自己使用的，不需要进入注册中心，相互传递。这些配置项和元数据(服务接口，接口的方法信息)都需要被存储下来，保存到独立的key-value存储库中。provider存储内容都通过gson化后进行存储。</p>
+<p><strong>在配置中心配置</strong></p>
+<pre><code class='language-properties' lang='properties'>dubbo.registry.address=zookeeper://127.0.0.1:2181
+### 注意驼峰式风格
+dubbo.metadata-report.address=zookeeper://127.0.0.1:2181 ###元数据存储的地址
+</code></pre>
+<p>这里使用zookeeper作为配置中心，元数据地址和注册中心地址相同，启动zookeeper之后运行ZKTools就可以写入</p>
+<pre><code class='language-properties' lang='properties'>###dubbo.properties
+dubbo.config-center.address=zookeeper://127.0.0.1:2181
+</code></pre>
+<p>完成上面两步后，注册中心地址和元数据地址将从配置中心获取。</p>
+<p><strong>配置在项目中-properties方式引入配置</strong></p>
+<p>&nbsp;</p>
+<h3>推荐用法</h3>
+<p>在Provider端尽量多配置Consumer端属性，建议在Provider端配置的Consumer端的实行有：</p>
+<ol>
+<li><code>timeout</code>：方法调用的超时时间</li>
+<li><code>retries</code>：失败重试次数，缺省是 2</li>
+<li><code>loadbalance</code>：负载均衡算法，缺省是随机 <code>random</code>。还可以配置轮询 <code>roundrobin</code>、最不活跃优先<code>leastactive</code> 和一致性哈希 <code>consistenthash</code> 等</li>
+<li><code>actives</code>：消费者端的最大并发调用限制，即当 Consumer 对一个服务的并发调用到上限后，新调用会阻塞直到超时，在方法上配置 <code>dubbo:method</code> 则针对该方法进行并发限制，在接口上配置 <code>dubbo:service</code>，则针对该服务进行并发限制</li>
+
+</ol>
+<p>建议在Provider端配置的Provider的属性有：</p>
+<ol>
+<li><code>threads</code>：服务线程池大小</li>
+<li><code>executes</code>：一个服务提供者并行执行请求上限，即当 Provider 对一个服务的并发调用达到上限后，新调用会阻塞，此时 Consumer 可能会超时。在方法上配置 <code>dubbo:method</code> 则针对该方法进行并发限制，在接口上配置 <code>dubbo:service</code>，则针对该服务进行并发限制</li>
+
+</ol>
+<p>配置管理信息、配置Dubbo缓存文件( 该文件会缓存注册中心列表和服务提供者列表。配置缓存文件后，应用重启过程中，若注册中心不可用，应用会从该缓存文件读取服务提供者列表，进一步保证应用可靠性)、配置监控中心、推荐使用XML配置。</p>
