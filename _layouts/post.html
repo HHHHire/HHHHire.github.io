@@ -12,6 +12,26 @@ layout: default
         position: relative;
         background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')
     }
+    .outer-container{
+	width: 360px;
+	height: 200px;
+	position: relative;
+	overflow: hidden;
+    }
+    .inner-container{
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: -17px;
+        bottom: 0;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+
+作者：前端开发博客
+链接：https://juejin.im/post/5aad26ec6fb9a028ba1f416b
+来源：掘金
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 
     {% if page.header-mask %}
     header.intro-header .header-mask{
@@ -49,8 +69,8 @@ layout: default
 
 <!-- Post Content -->
 <article>
-    <div class="container">
-        <div class="row">
+    <div class="container outer-container">
+        <div class="row inner-container">
 
     <!-- Post Container -->
             <div class="
