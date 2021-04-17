@@ -1,3 +1,14 @@
+---
+layout:     post
+title:      RocketMQ
+subtitle:   RocketMQ基础学习
+date:       2020-8-7
+author:     HUA
+header-img: img/home-bg-o.jpg
+catalog: 	 true
+tags:
+    - 消息队列
+---
 # RocketMQ
 
 > [RocketMQ](https://github.com/apache/rocketmq/blob/master/docs/cn/README.md)

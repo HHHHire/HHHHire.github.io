@@ -1,3 +1,14 @@
+---
+layout:     post
+title:      Sentinel
+subtitle:   Sentinel基础
+date:       2020-8-7
+author:     HUA
+header-img: img/home-bg-o.jpg
+catalog: 	 true
+tags:
+    - 微服务
+---
 # Sentinel
 
 > 服务雪崩：由于一个服务出现了问题导致阻塞，而其他依赖它的服务也跟着阻塞，导致了整个服务挂掉

@@ -1,3 +1,14 @@
+---
+layout:     post
+title:      postgresql
+subtitle:   postgresql基础学习
+date:       2020-7-9
+author:     HUA
+header-img: img/home-bg-o.jpg
+catalog: 	 true
+tags:
+    - 数据库
+---
 # postgresql
 
 >  PostGreSQL是一个功能强大的开源对象关系数据库管理系统(ORDBMS)，号称**世界上最先进的开源关系型数据库**。经过长达15年以上的积极开发和不断改进，PostGreSQL已在可靠性、稳定性、数据一致性等获得了很大的提升。

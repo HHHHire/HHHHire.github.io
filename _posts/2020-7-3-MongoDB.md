@@ -1,3 +1,14 @@
+---
+layout:     post
+title:      MongoDB
+subtitle:   MongoDB基础学习
+date:       2020-7-3
+author:     HUA
+header-img: img/home-bg-o.jpg
+catalog: 	 true
+tags:
+    - 数据库
+---
 ## MongoDB
 
 #### 数据库

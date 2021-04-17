@@ -1,3 +1,15 @@
+---
+layout:     post
+title:      springCloudAlibaba
+subtitle:   springCloudAlibaba
+date:       2020-7-19
+author:     HUA
+header-img: img/home-bg-o.jpg
+catalog: 	 true
+tags:
+    - springcloud
+    - 微服务
+---
 # SpringCloudAlibaba
 
 [学习demo](https://github.com/HHHHire/learn/blob/master/springcloud-alibaba-demo)
